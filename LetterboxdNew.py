@@ -205,11 +205,11 @@ class FilmScraper:
                 film_title = full_title.split(" directed by ")[0].strip()
                 film_title = ''.join(char for char in film_title if char.isprintable()).strip()
                 if film_title and film_title != "Letterboxd":
-                    return film_title
+                    return self._remove_year_from_title(film_title)
             elif " • Letterboxd" in full_title:
                 film_title = full_title.split(" • Letterboxd")[0].strip()
                 if film_title and film_title != "Letterboxd":
-                    return film_title
+                    return self._remove_year_from_title(film_title)
         
         selectors = [
             "h1.headline-1.filmtitle",
@@ -224,7 +224,7 @@ class FilmScraper:
             if elem:
                 title = elem.get_text().strip()
                 if title and title != "Letterboxd — Your life in film" and len(title) > 1:
-                    return title
+                    return self._remove_year_from_title(title)
         
         h1_elements = soup.select("h1")
         for h1 in h1_elements:
@@ -234,9 +234,13 @@ class FilmScraper:
                 "Add" not in title and 
                 "to lists" not in title and
                 len(title) > 3):
-                return title
+                return self._remove_year_from_title(title)
         
         return "Unknown Title"
+
+    def _remove_year_from_title(self, title):
+        """Remove year in parentheses from title"""
+        return re.sub(r'\s*\(\d{4}\)\s*$', '', title).strip()
 
     def extract_release_date(self, soup):
         """Extract release date/year"""
