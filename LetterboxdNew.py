@@ -501,9 +501,6 @@ class FilmScraper:
                 
                 time.sleep(random.uniform(2, 4))
                 
-                if idx % 10 == 0:
-                    self.save_progress(detailed_films, f"films_progress_{idx}.json")
-                
                 if self.use_selenium and self.browser and idx % 100 == 0:
                     print("Refreshing browser...")
                     self.browser.quit()
