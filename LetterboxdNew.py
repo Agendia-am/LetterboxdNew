@@ -17,7 +17,9 @@ import random
 import logging
 from pathlib import Path
 import concurrent.futures
+import asyncio
 from datetime import datetime
+from tqdm import tqdm
 
 # Playwright support (used for faster, modern browser automation)
 try:
@@ -621,68 +623,69 @@ class FilmScraper:
 
             # Parallel mode
             if parallel_workers and parallel_workers > 1:
-                print(f"Starting parallel scrape with {parallel_workers} workers...")
+                print(f"Starting parallel scrape with {parallel_workers} workers...\n")
 
                 # Prefer async Playwright parallel scraper when Playwright is enabled and async API is available
                 if self.use_playwright and PLAYWRIGHT_ASYNC_AVAILABLE:
                     pw_results = self._run_playwright_parallel(films_to_process, parallel_workers)
-                    for completed, film_details in enumerate(pw_results, start=1):
-                        idx = start_index + completed
-                        film = films_to_process[completed - 1]
-                        print(f"\n[{idx}/{len(valid_films)}] Processing (playwright parallel): {film.get('title', 'Unknown')}")
-                        detailed_films.append(film_details)
-                        if film_details.get('scrape_status') == 'success':
-                            print(f"✓ Successfully scraped: {film_details['title']}")
-                            if film_details.get('average_rating'):
-                                print(f"  Rating: {film_details['average_rating']}/5")
-                        else:
-                            print(f"⚠ Partially scraped: {film_details['title']} - {film_details.get('scrape_status')}")
+                    
+                    with tqdm(total=len(pw_results), desc="Scraping films (Playwright)", unit="film") as pbar:
+                        for film_details in pw_results:
+                            detailed_films.append(film_details)
+                            status = "✓" if film_details.get('scrape_status') == 'success' else "⚠"
+                            pbar.update(1)
+                            pbar.set_postfix({
+                                'current': film_details.get('title', 'Unknown')[:40],
+                                'status': status
+                            })
                 else:
-                    # Fallback to requests-based ThreadPoolExecutor
+                    # Fallback to requests-based ThreadPoolExecutor with progress bar
                     with concurrent.futures.ThreadPoolExecutor(max_workers=parallel_workers) as exc:
                         future_map = {exc.submit(self._scrape_film_requests, film['url']): film for film in films_to_process}
-                        completed = 0
-                        for future in concurrent.futures.as_completed(future_map):
-                            film = future_map[future]
-                            completed += 1
-                            idx = start_index + completed
-                            print(f"\n[{idx}/{len(valid_films)}] Processing (parallel): {film.get('title', 'Unknown')}")
-                            try:
-                                film_details = future.result()
-                            except Exception as e:
-                                film_details = self.create_minimal_film_data(film.get('url'), f"Worker error: {e}")
+                        
+                        with tqdm(total=len(films_to_process), desc="Scraping films (Parallel)", unit="film") as pbar:
+                            for future in concurrent.futures.as_completed(future_map):
+                                film = future_map[future]
+                                try:
+                                    film_details = future.result()
+                                except Exception as e:
+                                    film_details = self.create_minimal_film_data(film.get('url'), f"Worker error: {e}")
 
-                            detailed_films.append(film_details)
-                            if film_details.get('scrape_status') == 'success':
-                                print(f"✓ Successfully scraped: {film_details['title']}")
-                                if film_details.get('average_rating'):
-                                    print(f"  Rating: {film_details['average_rating']}/5")
-                            else:
-                                print(f"⚠ Partially scraped: {film_details['title']} - {film_details.get('scrape_status')}")
+                                detailed_films.append(film_details)
+                                
+                                # Update progress bar with status
+                                status = "✓" if film_details.get('scrape_status') == 'success' else "⚠"
+                                pbar.update(1)
+                                pbar.set_postfix({
+                                    'current': film_details.get('title', 'Unknown')[:40],
+                                    'status': status
+                                })
 
             else:
-                for idx, film in enumerate(films_to_process, start=start_index + 1):
-                    print(f"\n[{idx}/{len(valid_films)}] Processing: {film.get('title', 'Unknown')}")
+                # Sequential mode with progress bar
+                for idx, film in tqdm(enumerate(films_to_process, start=start_index + 1), 
+                                      total=len(films_to_process), 
+                                      desc="Scraping films", 
+                                      unit="film"):
                     
                     film_details = self.scrape_film_details(film['url'])
                     if film_details:
                         detailed_films.append(film_details)
-                        if film_details.get('scrape_status') == 'success':
-                            print(f"✓ Successfully scraped: {film_details['title']}")
-                            if film_details.get('average_rating'):
-                                print(f"  Rating: {film_details['average_rating']}/5")
-                        else:
-                            print(f"⚠ Partially scraped: {film_details['title']} - {film_details.get('scrape_status')}")
+                        
+                        # Update progress bar with film info
+                        status = "✓" if film_details.get('scrape_status') == 'success' else "⚠"
+                        rating_info = f" [{film_details.get('average_rating')}/5]" if film_details.get('average_rating') else ""
+                        tqdm.write(f"{status} {film_details['title']}{rating_info}")
                     
                     time.sleep(random.uniform(2, 4))
                     
                     if self.use_selenium and self.browser and idx % 100 == 0:
-                        print("Refreshing browser...")
+                        tqdm.write("Refreshing browser...")
                         self.browser.quit()
                         self.setup_browser()
 
         except KeyboardInterrupt:
-            print("\nScraping interrupted by user.")
+            print("\n\nScraping interrupted by user.")
         except Exception as e:
             print(f"Critical error during scraping: {e}")
         finally:
@@ -699,13 +702,50 @@ class FilmScraper:
     def _run_playwright_parallel(self, films_to_process, parallel_workers):
         """Run the async Playwright parallel scraper and return results (sync wrapper)."""
         try:
+            # Try to run asyncio.run() - works in normal execution
             return asyncio.run(self._playwright_parallel_scrape(films_to_process, parallel_workers))
+        except RuntimeError as e:
+            if "asyncio.run() cannot be called from a running event loop" in str(e):
+                # Already in an event loop (e.g., debugger, Jupyter), fall back to requests with progress bar
+                results = []
+                with tqdm(total=len(films_to_process), desc="Scraping films (Requests fallback)", unit="film") as pbar:
+                    for film in films_to_process:
+                        result = self._scrape_film_requests(film['url'])
+                        results.append(result)
+                        status = "✓" if result.get('scrape_status') == 'success' else "⚠"
+                        pbar.update(1)
+                        pbar.set_postfix({
+                            'current': result.get('title', 'Unknown')[:40],
+                            'status': status
+                        })
+                return results
+            else:
+                # Other runtime errors, fall back with progress bar
+                results = []
+                with tqdm(total=len(films_to_process), desc="Scraping films (Requests fallback)", unit="film") as pbar:
+                    for film in films_to_process:
+                        result = self._scrape_film_requests(film['url'])
+                        results.append(result)
+                        status = "✓" if result.get('scrape_status') == 'success' else "⚠"
+                        pbar.update(1)
+                        pbar.set_postfix({
+                            'current': result.get('title', 'Unknown')[:40],
+                            'status': status
+                        })
+                return results
         except Exception as e:
-            # If asyncio.run fails (e.g., already running event loop), fall back to sequential requests
-            print(f"Playwright parallel runner failed: {e}")
+            # Any other exception, fall back to requests with progress bar
             results = []
-            for film in films_to_process:
-                results.append(self._scrape_film_requests(film['url']))
+            with tqdm(total=len(films_to_process), desc="Scraping films (Requests fallback)", unit="film") as pbar:
+                for film in films_to_process:
+                    result = self._scrape_film_requests(film['url'])
+                    results.append(result)
+                    status = "✓" if result.get('scrape_status') == 'success' else "⚠"
+                    pbar.update(1)
+                    pbar.set_postfix({
+                        'current': result.get('title', 'Unknown')[:40],
+                        'status': status
+                    })
             return results
 
     async def _playwright_parallel_scrape(self, films_to_process, parallel_workers):
@@ -770,9 +810,25 @@ class FilmScraper:
                             return self.create_minimal_film_data(url, f"Parse error: {e}")
 
                 tasks = [asyncio.create_task(fetch(f)) for f in films_to_process]
-                completed = await asyncio.gather(*tasks)
+                
+                # Create progress bar for async tasks
+                completed_count = 0
+                results = []
+                pbar = tqdm(total=len(tasks), desc="Scraping films (Playwright)", unit="film")
+                
+                for coro in asyncio.as_completed(tasks):
+                    result = await coro
+                    results.append(result)
+                    completed_count += 1
+                    status = "✓" if result.get('scrape_status') == 'success' else "⚠"
+                    pbar.update(1)
+                    pbar.set_postfix({
+                        'current': result.get('title', 'Unknown')[:40],
+                        'status': status
+                    })
+                pbar.close()
+                
                 await browser.close()
-                results = completed
         except Exception as e:
             print(f"Playwright parallel scraping failed: {e}")
             # Fallback to requests-based scraping
@@ -952,13 +1008,16 @@ def collect_all_films(username="Agendia", max_pages=None):
     all_films = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as exc:
         future_to_url = {exc.submit(fetch_page, url): url for url in page_urls}
-        for future in concurrent.futures.as_completed(future_to_url):
-            url = future_to_url[future]
-            html = future.result()
-            films = parse_films_from_html(html)
-            if films:
-                print(f"{url} -> found {len(films)} films")
-                all_films.extend(films)
+        
+        with tqdm(total=len(page_urls), desc="Collecting films from profile", unit="page") as pbar:
+            for future in concurrent.futures.as_completed(future_to_url):
+                url = future_to_url[future]
+                html = future.result()
+                films = parse_films_from_html(html)
+                if films:
+                    all_films.extend(films)
+                pbar.update(1)
+                pbar.set_postfix({'films_found': len(all_films)})
 
     # Deduplicate by URL
     seen = set()
