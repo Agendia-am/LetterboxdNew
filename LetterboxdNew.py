@@ -822,27 +822,43 @@ def main():
         print(f"{'='*50}")
         all_detailed_films = merge_film_data(existing_films, newly_scraped)
         
-        # Step 5: Save merged results
+        # Step 5: Save merged results (full detailed backup)
         output_filename = f'{username}_detailed_films.json'
         with open(output_filename, 'w', encoding='utf-8') as f:
             json.dump(all_detailed_films, f, indent=2, ensure_ascii=False)
-        
+
+        # Also save a minimal export with only the requested fields
+        minimal_fields = []
+        for film in all_detailed_films:
+            minimal_fields.append({
+                'title': film.get('title'),
+                'release_year': film.get('release_date'),
+                'runtime': film.get('runtime'),
+                'average_rating': film.get('average_rating'),
+                'genres': film.get('genres'),
+                'directors': film.get('directors'),
+                'actors': film.get('actors'),
+                'studios': film.get('studios'),
+                'language': film.get('language'),
+                'country': film.get('country'),
+                'writers': film.get('writers'),
+                'composer': film.get('composer'),
+                'cinematographer': film.get('cinematographer'),
+                'description': film.get('description'),
+                'url': film.get('url')
+            })
+
+        minimal_filename = f'{username}_films_minimal.json'
+        with open(minimal_filename, 'w', encoding='utf-8') as f:
+            json.dump(minimal_fields, f, indent=2, ensure_ascii=False)
+
         print(f"\n{'='*50}")
         print(f"SCRAPING COMPLETE!")
         print(f"{'='*50}")
         print(f"Newly scraped films: {len(newly_scraped)}")
         print(f"Total films in database: {len(all_detailed_films)}")
-        print(f"Results saved to '{output_filename}'")
-        
-        # Step 6: Display summary of new films
-        if newly_scraped:
-            print(f"\n{'='*50}")
-            print(f"NEWLY SCRAPED FILM DETAILS ({len(newly_scraped)} films):")
-            print(f"{'='*50}")
-            
-            for idx, film in enumerate(newly_scraped, 1):
-                print(f"\n{'='*20} NEW FILM #{idx} {'='*20}")
-                display_film_details(film)
+        print(f"Full results saved to '{output_filename}'")
+        print(f"Minimal export saved to '{minimal_filename}' (contains title, year, runtime, rating, genres, directors, actors, studios, language, country, writers, composer, cinematographer, description, url)")
         
         # Step 7: Show statistics
         print(f"\n{'='*50}")
