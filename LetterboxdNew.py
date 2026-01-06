@@ -259,6 +259,7 @@ class FilmScraper:
             'cinematographer': self.extract_cinematographer(soup),
             'average_rating': self.extract_average_rating(soup),
             'description': self.extract_description(soup),
+            'personal_rating': None,  # Will be populated from films list
             'scrape_status': 'success',
             'last_scraped': datetime.now().isoformat()
         }
@@ -299,6 +300,7 @@ class FilmScraper:
                 'cinematographer': self.extract_cinematographer(soup),
                 'average_rating': self.extract_average_rating(soup),
                 'description': self.extract_description(soup),
+                'personal_rating': None,  # Will be populated from films list
                 'scrape_status': 'success',
                 'last_scraped': datetime.now().isoformat()
             }
@@ -605,6 +607,9 @@ class FilmScraper:
         """Scrape details for all films in the list"""
         detailed_films = []
         
+        # Create a mapping of URL to personal rating for later merge
+        personal_ratings_map = {film['url']: film.get('personal_rating') for film in all_films if isinstance(film, dict) and film.get('url')}
+        
         valid_films = []
         invalid_count = 0
         
@@ -690,6 +695,11 @@ class FilmScraper:
             print(f"Critical error during scraping: {e}")
         finally:
             self.cleanup()
+
+        # Merge personal ratings back into detailed films
+        for film in detailed_films:
+            if film.get('url') in personal_ratings_map:
+                film['personal_rating'] = personal_ratings_map[film['url']]
 
         return detailed_films
 
@@ -794,6 +804,7 @@ class FilmScraper:
                                 'cinematographer': self.extract_cinematographer(soup),
                                 'average_rating': self.extract_average_rating(soup),
                                 'description': self.extract_description(soup),
+                                'personal_rating': None,  # Will be populated from films list
                                 'scrape_status': 'success',
                                 'last_scraped': datetime.now().isoformat()
                             }
@@ -942,35 +953,94 @@ def collect_all_films(username="Agendia", max_pages=None):
         soup = BeautifulSoup(html, 'html.parser')
         films = []
 
-        film_containers = soup.select("div.react-component[data-component-class='LazyPoster']")
+        # Look for grid items (rendered structure after JS execution)
+        film_containers = soup.select("li.griditem")
         if not film_containers:
+            # Fallback to poster-container
             film_containers = soup.select("li.poster-container")
+        if not film_containers:
+            film_containers = soup.select("ul.poster-list > li")
+        if not film_containers:
+            # Fallback to React components (but these might not have ratings rendered)
+            film_containers = soup.select("div.react-component[data-component-class='LazyPoster']")
         if not film_containers:
             film_containers = soup.select("li[data-film-id]")
 
-        for film_container in film_containers:
-            link_tag = film_container.select_one("a.frame")
-            if not link_tag:
-                link_tag = film_container.select_one("div.film-poster a")
-            if not link_tag:
-                link_tag = film_container.select_one("a")
+        print(f"Found {len(film_containers)} film containers")
 
-            if link_tag and link_tag.get('href'):
-                film_url = "https://letterboxd.com" + link_tag.get('href')
-                title = None
-                if film_container.get('data-item-name'):
-                    title = film_container.get('data-item-name')
-                elif link_tag.get('data-original-title'):
-                    title = link_tag.get('data-original-title')
-                elif link_tag.get('title'):
-                    title = link_tag.get('title')
-                elif film_container.select_one('img'):
-                    title = film_container.select_one('img').get('alt')
-                else:
-                    title = link_tag.get_text().strip()
+        for idx, film_container in enumerate(film_containers):
+            film_url = None
+            title = None
+            personal_rating = None
+            
+            # Try to extract film URL from data attribute first (for griditem)
+            react_component = film_container.select_one("div.react-component[data-item-link]")
+            if react_component:
+                item_link = react_component.get('data-item-link')
+                if item_link:
+                    film_url = "https://letterboxd.com" + item_link
+                    title = react_component.get('data-item-name') or react_component.get('data-item-full-display-name')
+            
+            # Fallback: try finding link tag
+            if not film_url:
+                link_tag = film_container.select_one("a.frame")
+                if not link_tag:
+                    link_tag = film_container.select_one("div.film-poster a")
+                if not link_tag:
+                    link_tag = film_container.select_one("a")
 
-                if film_url and title:
-                    films.append({'title': title, 'url': film_url})
+                if link_tag and link_tag.get('href'):
+                    film_url = "https://letterboxd.com" + link_tag.get('href')
+                    if not title:
+                        if film_container.get('data-item-name'):
+                            title = film_container.get('data-item-name')
+                        elif link_tag.get('data-original-title'):
+                            title = link_tag.get('data-original-title')
+                        elif link_tag.get('title'):
+                            title = link_tag.get('title')
+                        elif film_container.select_one('img'):
+                            title = film_container.select_one('img').get('alt')
+                        else:
+                            title = link_tag.get_text().strip()
+
+            # Extract personal rating (out of 10) and convert to scale of 5
+            # Look for rating span with multiple possible selectors
+            rating_spans = film_container.select('span.rating')
+            if not rating_spans:
+                # Try finding any span with a 'rated-' class
+                rating_spans = film_container.select('span[class*="rated-"]')
+            
+            if idx < 3:
+                print(f"\nFilm {idx}: {title}")
+                print(f"  URL: {film_url}")
+                print(f"  Found {len(rating_spans)} rating spans")
+            
+            for rating_span in rating_spans:
+                rating_class = rating_span.get('class', [])
+                if isinstance(rating_class, str):
+                    rating_class = rating_class.split()
+                
+                for cls in rating_class:
+                    if cls.startswith('rated-'):
+                        try:
+                            # Extract rating number (e.g., 'rated-7' -> 7)
+                            rating_10 = int(cls.replace('rated-', ''))
+                            # Convert from 10-point to 5-point scale
+                            personal_rating = rating_10 / 2.0
+                            if idx < 3:
+                                print(f"  ✓ Found rating: {personal_rating}/5 (was {rating_10}/10)")
+                        except (ValueError, AttributeError):
+                            pass
+                        break
+                if personal_rating is not None:
+                    break
+
+            if film_url and title:
+                    films.append({
+                        'title': title, 
+                        'url': film_url,
+                        'personal_rating': personal_rating
+                    })
 
         return films
 
@@ -1086,6 +1156,7 @@ def display_film_details(film):
     print(f"Release Year: {film['release_date']}")
     print(f"Runtime: {film.get('runtime', 'N/A')}")
     print(f"Average Rating: {film.get('average_rating', 'N/A')}/5")
+    print(f"Personal Rating: {film.get('personal_rating', 'N/A')}/5")
     print(f"Genres: {', '.join(film['genres']) if film['genres'] else 'N/A'}")
     print(f"Directors: {', '.join(film['directors']) if film['directors'] else 'N/A'}")
     print(f"Actors: {', '.join(film['actors'][:10]) if film['actors'] else 'N/A'}")
@@ -1195,6 +1266,7 @@ def main():
                 'release_year': film.get('release_date'),
                 'runtime': film.get('runtime'),
                 'average_rating': film.get('average_rating'),
+                'personal_rating': film.get('personal_rating'),
                 'genres': film.get('genres'),
                 'directors': film.get('directors'),
                 'actors': film.get('actors'),
@@ -1218,7 +1290,7 @@ def main():
         print(f"Newly scraped films: {len(newly_scraped)}")
         print(f"Total films in database: {len(all_detailed_films)}")
         print(f"Full results saved to '{output_filename}'")
-        print(f"Minimal export saved to '{minimal_filename}' (contains title, year, runtime, rating, genres, directors, actors, studios, language, country, writers, composer, cinematographer, description, url)")
+        print(f"Minimal export saved to '{minimal_filename}' (contains title, year, runtime, average_rating, personal_rating, genres, directors, actors, studios, language, country, writers, composer, cinematographer, description, url)")
         
         # Step 7: Show statistics
         print(f"\n{'='*50}")
