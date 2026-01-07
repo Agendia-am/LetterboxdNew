@@ -289,8 +289,57 @@ class MovieRecommender:
             )
             candidates['rec_score'] += candidates['actor_match_score'] * 0.05
         
-        # Sort by recommendation score
-        recommendations = candidates.nlargest(top_n, 'rec_score')
+        # Sort by recommendation score and add score-based shuffling for variety
+        candidates_sorted = candidates.sort_values('rec_score', ascending=False)
+        
+        # Group films by score ranges and shuffle within ranges for variety
+        import random
+        score_ranges = [
+            (0.9, 1.0, 0.05),   # Top tier: shuffle within 0.05 range
+            (0.8, 0.9, 0.05),   # High tier
+            (0.7, 0.8, 0.05),   # Mid-high tier
+            (0.0, 0.7, 0.1)     # Lower tiers: wider range
+        ]
+        
+        shuffled_results = []
+        used_indices = set()
+        
+        for min_score, max_score, bin_size in score_ranges:
+            # Get films in this score range
+            range_films = candidates_sorted[
+                (candidates_sorted['rec_score'] >= min_score) & 
+                (candidates_sorted['rec_score'] < max_score)
+            ]
+            
+            if len(range_films) == 0:
+                continue
+            
+            # Create bins within this range
+            current_min = max_score
+            while current_min > min_score:
+                current_max = current_min
+                current_min = max(current_max - bin_size, min_score)
+                
+                bin_films = range_films[
+                    (range_films['rec_score'] >= current_min) & 
+                    (range_films['rec_score'] < current_max)
+                ]
+                
+                if len(bin_films) > 0:
+                    # Shuffle films within this bin
+                    bin_indices = bin_films.index.tolist()
+                    random.shuffle(bin_indices)
+                    
+                    for idx in bin_indices:
+                        if idx not in used_indices:
+                            shuffled_results.append(candidates_sorted.loc[idx])
+                            used_indices.add(idx)
+        
+        # Convert back to DataFrame and return top_n
+        if shuffled_results:
+            recommendations = pd.DataFrame(shuffled_results).head(top_n)
+        else:
+            recommendations = candidates_sorted.head(top_n)
         
         return recommendations
     

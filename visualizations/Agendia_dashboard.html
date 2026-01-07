@@ -1,0 +1,282 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Letterboxd Report - Agendia</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #14181c;
+                color: white;
+                margin: 0;
+                padding: 20px;
+            }
+            h1 {
+                text-align: center;
+                color: #00e054;
+            }
+            h2 {
+                color: #00e054;
+                text-align: center;
+                margin-top: 40px;
+            }
+            .chart-container {
+                margin: 20px auto;
+                max-width: 1200px;
+            }
+            iframe {
+                width: 100%;
+                border: none;
+            }
+            .recommendations {
+                max-width: 1200px;
+                margin: 40px auto;
+                padding: 30px;
+                background-color: #1c2228;
+                border-radius: 10px;
+                border: 2px solid #00e054;
+            }
+            .recommendation {
+                background-color: #2c3440;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+                border-left: 4px solid #00e054;
+            }
+            .recommendation h3 {
+                margin-top: 0;
+                color: #00e054;
+                font-size: 1.3em;
+            }
+            .recommendation .info {
+                margin: 10px 0;
+                color: #9ab;
+            }
+            .recommendation .rating {
+                color: #ff8000;
+                font-weight: bold;
+            }
+            .recommendation .genres {
+                color: #678;
+                font-style: italic;
+            }
+            .recommendation .reason {
+                color: #abc;
+                margin: 8px 0;
+                padding-left: 15px;
+                border-left: 2px solid #456;
+            }
+            .recommendation a {
+                color: #00e054;
+                text-decoration: none;
+                display: inline-block;
+                margin-top: 10px;
+            }
+            .recommendation a:hover {
+                text-decoration: underline;
+            }
+            .no-recommendations {
+                text-align: center;
+                color: #9ab;
+                padding: 30px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>📊 Letterboxd Visualization Report: Agendia</h1>
+    
+        <div class="recommendations">
+            <h2>🎬 Recommended Movies for You</h2>
+            <p style="text-align: center; color: #9ab;">Based on your viewing history and preferences</p>
+        
+            <div class="recommendation">
+                <h3>1. The Handmaiden (2016)</h3>
+                <div class="info">
+                    <span class="rating">⭐ 4.39/5</span> • 
+                    <span class="genres">🎭 Thriller, Romance, Drama</span>
+                </div>
+                <div class="info">🎬 Director: Park Chan-wook</div>
+            <div style="margin-top: 15px;"><div class="reason">💡 Genres you love: Romance, Thriller, Drama</div><div class="reason">💡 High community rating: 4.4/5</div></div>
+                <a href="https://letterboxd.com/film/the-handmaiden/" target="_blank">View on Letterboxd →</a>
+            </div>
+            
+            <div class="recommendation">
+                <h3>2. Léon: The Professional (1994)</h3>
+                <div class="info">
+                    <span class="rating">⭐ 4.01/5</span> • 
+                    <span class="genres">🎭 Crime, Action, Drama</span>
+                </div>
+                <div class="info">🎬 Director: Luc Besson</div>
+            <div style="margin-top: 15px;"><div class="reason">💡 Genres you love: Action, Crime, Drama</div><div class="reason">💡 High community rating: 4.0/5</div></div>
+                <a href="https://letterboxd.com/film/leon-the-professional/" target="_blank">View on Letterboxd →</a>
+            </div>
+            
+            <div class="recommendation">
+                <h3>3. Frances Ha (2012)</h3>
+                <div class="info">
+                    <span class="rating">⭐ 4.03/5</span> • 
+                    <span class="genres">🎭 Comedy, Drama</span>
+                </div>
+                <div class="info">🎬 Director: Noah Baumbach</div>
+            <div style="margin-top: 15px;"><div class="reason">💡 Genres you love: Comedy, Drama</div><div class="reason">💡 High community rating: 4.0/5</div></div>
+                <a href="https://letterboxd.com/film/frances-ha/" target="_blank">View on Letterboxd →</a>
+            </div>
+            
+            <div class="recommendation">
+                <h3>4. Atonement (2007)</h3>
+                <div class="info">
+                    <span class="rating">⭐ 4.01/5</span> • 
+                    <span class="genres">🎭 Romance, Drama</span>
+                </div>
+                <div class="info">🎬 Director: Joe Wright</div>
+            <div style="margin-top: 15px;"><div class="reason">💡 Genres you love: Romance, Drama</div><div class="reason">💡 High community rating: 4.0/5</div></div>
+                <a href="https://letterboxd.com/film/atonement/" target="_blank">View on Letterboxd →</a>
+            </div>
+            
+            <div class="recommendation">
+                <h3>5. The Royal Tenenbaums (2001)</h3>
+                <div class="info">
+                    <span class="rating">⭐ 4.11/5</span> • 
+                    <span class="genres">🎭 Drama, Comedy</span>
+                </div>
+                <div class="info">🎬 Director: Wes Anderson</div>
+            <div style="margin-top: 15px;"><div class="reason">💡 Genres you love: Comedy, Drama</div><div class="reason">💡 High community rating: 4.1/5</div></div>
+                <a href="https://letterboxd.com/film/the-royal-tenenbaums/" target="_blank">View on Letterboxd →</a>
+            </div>
+            
+            <div class="recommendation">
+                <h3>6. Train to Busan (2016)</h3>
+                <div class="info">
+                    <span class="rating">⭐ 3.98/5</span> • 
+                    <span class="genres">🎭 Thriller, Horror, Adventure</span>
+                </div>
+                <div class="info">🎬 Director: Yeon Sang-ho</div>
+            <div style="margin-top: 15px;"><div class="reason">💡 Genres you love: Adventure, Action, Horror</div><div class="reason">💡 High community rating: 4.0/5</div></div>
+                <a href="https://letterboxd.com/film/train-to-busan/" target="_blank">View on Letterboxd →</a>
+            </div>
+            
+            <div class="recommendation">
+                <h3>7. The Shape of Water (2017)</h3>
+                <div class="info">
+                    <span class="rating">⭐ 3.67/5</span> • 
+                    <span class="genres">🎭 Fantasy, Drama, Romance</span>
+                </div>
+                <div class="info">🎬 Director: Guillermo del Toro</div>
+            <div style="margin-top: 15px;"><div class="reason">💡 Genres you love: Romance, Drama</div><div class="reason">💡 High community rating: 3.7/5</div></div>
+                <a href="https://letterboxd.com/film/the-shape-of-water/" target="_blank">View on Letterboxd →</a>
+            </div>
+            
+            <div class="recommendation">
+                <h3>8. I'm Still Here (2024)</h3>
+                <div class="info">
+                    <span class="rating">⭐ 4.33/5</span> • 
+                    <span class="genres">🎭 Drama, History</span>
+                </div>
+                <div class="info">🎬 Director: Walter Salles</div>
+            <div style="margin-top: 15px;"><div class="reason">💡 Genres you love: Drama</div><div class="reason">💡 High community rating: 4.3/5</div></div>
+                <a href="https://letterboxd.com/film/im-still-here-2024/" target="_blank">View on Letterboxd →</a>
+            </div>
+            
+            <div class="recommendation">
+                <h3>9. The Imitation Game (2014)</h3>
+                <div class="info">
+                    <span class="rating">⭐ 3.83/5</span> • 
+                    <span class="genres">🎭 Drama, War, Thriller</span>
+                </div>
+                <div class="info">🎬 Director: Morten Tyldum</div>
+            <div style="margin-top: 15px;"><div class="reason">💡 Genres you love: Drama, Thriller</div><div class="reason">💡 High community rating: 3.8/5</div></div>
+                <a href="https://letterboxd.com/film/the-imitation-game/" target="_blank">View on Letterboxd →</a>
+            </div>
+            
+            <div class="recommendation">
+                <h3>10. John Wick: Chapter 4 (2023)</h3>
+                <div class="info">
+                    <span class="rating">⭐ 3.89/5</span> • 
+                    <span class="genres">🎭 Crime, Action, Thriller</span>
+                </div>
+                <div class="info">🎬 Director: Chad Stahelski</div>
+            <div style="margin-top: 15px;"><div class="reason">💡 Genres you love: Action, Crime, Thriller</div><div class="reason">💡 High community rating: 3.9/5</div></div>
+                <a href="https://letterboxd.com/film/john-wick-chapter-4/" target="_blank">View on Letterboxd →</a>
+            </div>
+            
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_summary.html" height="500"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_rating_dist.html" height="600"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_rating_comparison.html" height="800"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_films_by_year.html" height="600"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_top_genres.html" height="600"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_top_directors.html" height="700"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_runtime_dist.html" height="600"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_rating_by_decade.html" height="600"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_top_actors.html" height="1000"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_genre_ratings.html" height="700"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_countries.html" height="700"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_rating_by_year.html" height="700"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_studio_ratings.html" height="800"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_director_actor_collab.html" height="900"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_genre_rating_scatter.html" height="900"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_runtime_by_genre.html" height="800"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_actor_rating_count.html" height="1000"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_language_dist.html" height="800"></iframe>
+        </div>
+        
+        <div class="chart-container">
+            <iframe src="Agendia_composer_actor_rating.html" height="1000"></iframe>
+        </div>
+        
+    </body>
+    </html>
+    

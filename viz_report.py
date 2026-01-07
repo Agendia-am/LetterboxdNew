@@ -1015,6 +1015,12 @@ def generate_report(username, recommendations=None):
         for rec in recommendations:
             title = rec.get('title', 'Unknown')
             year = rec.get('year', 'N/A')
+            # Format year as integer (no decimals)
+            if year != 'N/A':
+                try:
+                    year = int(float(year))
+                except (ValueError, TypeError):
+                    year = 'N/A'
             rating = rec.get('average_rating', 'N/A')
             genres = rec.get('genres', [])
             directors = rec.get('directors', [])
