@@ -78,17 +78,21 @@ def create_rating_comparison(df):
         y=rated_films['personal_rating'],
         mode='markers',
         marker=dict(
-            size=8,
+            size=10,  # Increased from 8
             color=rated_films['personal_rating'],
-            colorscale='Viridis',
+            colorscale=[[0, '#ff0000'], [0.5, '#ffcc00'], [1, '#00e054']],  # Red to Yellow to Green
             showscale=True,
-            colorbar=dict(title="Your Rating"),
-            line=dict(width=1, color='white')
+            colorbar=dict(
+                title=dict(text="Your Rating", font=dict(size=14, color='white')),
+                tickfont=dict(size=12, color='white')
+            ),
+            line=dict(width=2, color='white'),
+            opacity=0.8
         ),
         text=rated_films['title'],
-        hovertemplate='<b>%{text}</b><br>' +
-                      'Community: %{x}<br>' +
-                      'Your Rating: %{y}<extra></extra>',
+        hovertemplate='<b style="font-size:14px">%{text}</b><br>' +
+                      '<b>Community:</b> %{x}/5<br>' +
+                      '<b>Your Rating:</b> %{y}/5<extra></extra>',
         name='Films'
     ))
     
@@ -97,18 +101,25 @@ def create_rating_comparison(df):
         x=[0, 5],
         y=[0, 5],
         mode='lines',
-        line=dict(dash='dash', color='gray'),
+        line=dict(dash='dash', color='gray', width=3),
         name='Equal Rating Line',
-        showlegend=True
+        showlegend=True,
+        hoverinfo='skip'
     ))
     
     fig.update_layout(
-        title='Personal Rating vs Community Average',
-        xaxis_title='Community Average Rating',
-        yaxis_title='Your Personal Rating',
+        title=dict(
+            text='Personal Rating vs Community Average',
+            font=dict(size=20, color='white')
+        ),
+        xaxis_title=dict(text='Community Average Rating', font=dict(size=16, color='white')),
+        yaxis_title=dict(text='Your Personal Rating', font=dict(size=16, color='white')),
         template='plotly_dark',
-        xaxis=dict(range=[0, 5]),
-        yaxis=dict(range=[0, 5])
+        xaxis=dict(range=[0, 5], tickfont=dict(size=14)),
+        yaxis=dict(range=[0, 5], tickfont=dict(size=14)),
+        height=700,
+        hoverlabel=dict(bgcolor="rgba(0,0,0,0.9)", font=dict(size=14)),
+        legend=dict(font=dict(size=14))
     )
     
     return fig
@@ -579,34 +590,28 @@ def create_genre_personal_rating_scatter(df):
         theta=genres,
         fill='toself',
         name='Average Rating',
-        line=dict(color='#00e054', width=2),
-        fillcolor='rgba(0, 224, 84, 0.3)'
-    ))
-    
-    # Normalize counts to 0-5 scale for comparison
-    max_count = max(counts)
-    normalized_counts = [5 * (c / max_count) for c in counts]
-    
-    fig.add_trace(go.Scatterpolar(
-        r=normalized_counts,
-        theta=genres,
-        fill='toself',
-        name='Film Count (normalized)',
-        line=dict(color='#40bcf4', width=2),
-        fillcolor='rgba(64, 188, 244, 0.2)'
+        line=dict(color='#00e054', width=3),
+        fillcolor='rgba(0, 224, 84, 0.4)'
     ))
     
     fig.update_layout(
         polar=dict(
             radialaxis=dict(
                 visible=True,
-                range=[0, 5]
+                range=[0, 5],
+                tickfont=dict(size=14, color='white')
+            ),
+            angularaxis=dict(
+                tickfont=dict(size=14, color='white')
             )
         ),
-        showlegend=True,
-        title='Top 15 Genre Ratings and Count (Radar Chart)',
+        showlegend=False,
+        title=dict(
+            text='Top 15 Genre Ratings (Radar Chart)',
+            font=dict(size=20, color='white')
+        ),
         template='plotly_dark',
-        height=700
+        height=800
     )
     
     return fig
@@ -663,7 +668,7 @@ def create_runtime_by_genre(df):
 
 
 def create_actor_rating_count(df):
-    """Compare actor personal rating and count of films seen - ALL actors"""
+    """Compare actor personal rating and count of films seen - Treemap"""
     actor_ratings = {}
     
     for _, film in df.iterrows():
@@ -673,7 +678,7 @@ def create_actor_rating_count(df):
                     actor_ratings[actor] = []
                 actor_ratings[actor].append(film['personal_rating'])
     
-    # Show ALL actors (top 40 by count for readability)
+    # Show top 50 actors by count
     actor_stats = []
     for actor, ratings in actor_ratings.items():
         actor_stats.append({
@@ -685,36 +690,39 @@ def create_actor_rating_count(df):
     if not actor_stats:
         return go.Figure()
     
-    actor_df = pd.DataFrame(actor_stats).sort_values('count', ascending=False).head(40)
+    actor_df = pd.DataFrame(actor_stats).sort_values('count', ascending=False).head(50)
     
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=actor_df['count'],
-        y=actor_df['avg_rating'],
-        mode='markers+text',
+    # Create treemap with size=count, color=rating
+    fig = go.Figure(go.Treemap(
+        labels=actor_df['actor'],
+        parents=[''] * len(actor_df),
+        values=actor_df['count'],
         marker=dict(
-            size=actor_df['count'] * 2,
-            color=actor_df['avg_rating'],
-            colorscale='Viridis',
-            showscale=True,
-            colorbar=dict(title="Avg Rating"),
-            line=dict(width=1, color='white')
+            colorscale=[[0, '#ff0000'], [0.5, '#8b00ff'], [1, '#0066ff']],  # Red to Purple to Blue
+            cmid=2.5,
+            colorbar=dict(
+                title=dict(text="Avg<br>Rating", font=dict(size=14, color='white')),
+                tickfont=dict(size=12, color='white')
+            ),
+            line=dict(width=3, color='white')
         ),
+        marker_colorscale=[[0, '#ff0000'], [0.5, '#8b00ff'], [1, '#0066ff']],
+        marker_colors=actor_df['avg_rating'],
         text=actor_df['actor'],
-        textposition='top center',
-        textfont=dict(size=9),
-        hovertemplate='<b>%{text}</b><br>' +
-                      'Films: %{x}<br>' +
-                      'Avg Rating: %{y:.2f}<extra></extra>'
+        textfont=dict(size=16, color='white', family='Arial Black'),
+        hovertemplate='<b style="font-size:16px">%{label}</b><br>' +
+                      '<b>Films Watched:</b> %{value}<br>' +
+                      '<b>Avg Rating:</b> %{color:.2f}/5<extra></extra>'
     ))
     
     fig.update_layout(
-        title='Top 40 Actors: Personal Rating vs Films Watched',
-        xaxis_title='Number of Films Watched',
-        yaxis_title='Average Personal Rating',
+        title=dict(
+            text='Top 50 Actors: Films Watched (size) vs Rating (color)',
+            font=dict(size=20, color='white')
+        ),
         template='plotly_dark',
-        height=700,
-        yaxis=dict(range=[0, 5])
+        height=900,
+        hoverlabel=dict(bgcolor="rgba(0,0,0,0.9)", font=dict(size=14))
     )
     
     return fig
@@ -824,11 +832,11 @@ def create_summary_stats(df):
     total_runtime = df['runtime_mins'].sum() / 60  # Convert to hours
     
     stats_text = f"""
-    <b>Total Films:</b> {total_films}<br>
-    <b>Films You've Rated:</b> {rated_films}<br>
-    <b>Your Average Rating:</b> {avg_personal:.2f}/5<br>
-    <b>Community Average:</b> {avg_community:.2f}/5<br>
-    <b>Total Watch Time:</b> {total_runtime:.1f} hours<br>
+    <b style='font-size:24px'>Total Films:</b> <span style='font-size:24px; color:#00e054'>{total_films}</span><br><br>
+    <b style='font-size:24px'>Films You've Rated:</b> <span style='font-size:24px; color:#40bcf4'>{rated_films}</span><br><br>
+    <b style='font-size:24px'>Your Average Rating:</b> <span style='font-size:24px; color:#ffcc00'>{avg_personal:.2f}/5</span><br><br>
+    <b style='font-size:24px'>Community Average:</b> <span style='font-size:24px; color:#ff8000'>{avg_community:.2f}/5</span><br><br>
+    <b style='font-size:24px'>Total Watch Time:</b> <span style='font-size:24px; color:#9c27b0'>{total_runtime:.1f} hours</span><br>
     """
     
     fig = go.Figure()
@@ -844,9 +852,12 @@ def create_summary_stats(df):
     )
     
     fig.update_layout(
-        title='Summary Statistics',
+        title=dict(
+            text='Summary Statistics',
+            font=dict(size=24, color='white')
+        ),
         template='plotly_dark',
-        height=300,
+        height=400,
         xaxis=dict(visible=False),
         yaxis=dict(visible=False)
     )
