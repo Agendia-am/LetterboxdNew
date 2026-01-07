@@ -30,6 +30,14 @@ except ImportError:
     VIZ_AVAILABLE = False
     print("Note: viz_report module not found. Visualizations will be skipped.")
 
+# Import recommendation module
+try:
+    import movie_recommender
+    RECOMMENDER_AVAILABLE = True
+except ImportError:
+    RECOMMENDER_AVAILABLE = False
+    print("Note: movie_recommender module not found. Recommendations will be skipped.")
+
 # Playwright support (used for faster, modern browser automation)
 try:
     from playwright.sync_api import sync_playwright
@@ -1339,6 +1347,28 @@ def main():
                 print("You can run viz_report.py separately to generate charts.")
         elif not VIZ_AVAILABLE:
             print(f"\nℹ️  To generate visualizations, run: python viz_report.py")
+        
+        # Generate movie recommendations
+        if RECOMMENDER_AVAILABLE and len(all_detailed_films) > 0:
+            print(f"\n{'='*60}")
+            print(f"GENERATING MOVIE RECOMMENDATIONS")
+            print(f"{'='*60}")
+            try:
+                # Ask user if they want recommendations
+                generate_recs = input("\nWould you like to generate movie recommendations? (yes/no): ").strip().lower()
+                if generate_recs in ['yes', 'y']:
+                    recommendations = movie_recommender.generate_recommendations(username, top_n=10)
+                    if recommendations:
+                        print(f"\n✅ Successfully generated {len(recommendations)} recommendations!")
+                    else:
+                        print("\n⚠️  Could not generate recommendations. Please ensure you have rated some films.")
+                else:
+                    print("\nℹ️  Skipping recommendations. You can run: python movie_recommender.py")
+            except Exception as e:
+                print(f"Error generating recommendations: {e}")
+                print("You can run movie_recommender.py separately to generate recommendations.")
+        elif not RECOMMENDER_AVAILABLE:
+            print(f"\nℹ️  To generate recommendations, run: python movie_recommender.py")
             
     except Exception as e:
         print(f"Error in main function: {e}")
