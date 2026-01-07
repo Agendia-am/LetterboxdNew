@@ -1464,28 +1464,8 @@ def main():
             avg_rating = sum(float(f['average_rating']) for f in all_detailed_films if f.get('average_rating')) / with_ratings
             print(f"Average rating across collection: {avg_rating:.2f}/5")
         
-        # Automatically generate visualizations
-        if VIZ_AVAILABLE and len(all_detailed_films) > 0:
-            print(f"\n{'='*60}")
-            print(f"GENERATING VISUALIZATIONS")
-            print(f"{'='*60}")
-            try:
-                dashboard_file = viz_report.generate_report(username)
-                if dashboard_file:
-                    print(f"\n🎨 Visualizations complete!")
-                    print(f"Opening dashboard in browser...")
-                    try:
-                        webbrowser.open(f'file://{dashboard_file.absolute()}')
-                    except Exception as e:
-                        print(f"Couldn't auto-open browser: {e}")
-                        print(f"Manually open: {dashboard_file.absolute()}")
-            except Exception as e:
-                print(f"Error generating visualizations: {e}")
-                print("You can run viz_report.py separately to generate charts.")
-        elif not VIZ_AVAILABLE:
-            print(f"\nℹ️  To generate visualizations, run: python viz_report.py")
-        
-        # Generate movie recommendations
+        # Generate movie recommendations first (so we can include them in the dashboard)
+        recommendations = None
         if RECOMMENDER_AVAILABLE and len(all_detailed_films) > 0:
             print(f"\n{'='*60}")
             print(f"GENERATING MOVIE RECOMMENDATIONS")
@@ -1506,6 +1486,27 @@ def main():
                 print("You can run movie_recommender.py separately to generate recommendations.")
         elif not RECOMMENDER_AVAILABLE:
             print(f"\nℹ️  To generate recommendations, run: python movie_recommender.py")
+        
+        # Automatically generate visualizations (with recommendations if available)
+        if VIZ_AVAILABLE and len(all_detailed_films) > 0:
+            print(f"\n{'='*60}")
+            print(f"GENERATING VISUALIZATIONS")
+            print(f"{'='*60}")
+            try:
+                dashboard_file = viz_report.generate_report(username, recommendations=recommendations)
+                if dashboard_file:
+                    print(f"\n🎨 Visualizations complete!")
+                    print(f"Opening dashboard in browser...")
+                    try:
+                        webbrowser.open(f'file://{dashboard_file.absolute()}')
+                    except Exception as e:
+                        print(f"Couldn't auto-open browser: {e}")
+                        print(f"Manually open: {dashboard_file.absolute()}")
+            except Exception as e:
+                print(f"Error generating visualizations: {e}")
+                print("You can run viz_report.py separately to generate charts.")
+        elif not VIZ_AVAILABLE:
+            print(f"\nℹ️  To generate visualizations, run: python viz_report.py")
             
     except Exception as e:
         print(f"Error in main function: {e}")

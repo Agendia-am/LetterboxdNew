@@ -865,8 +865,8 @@ def create_summary_stats(df):
     return fig
 
 
-def generate_report(username):
-    """Generate complete visualization report"""
+def generate_report(username, recommendations=None):
+    """Generate complete visualization report with optional recommendations"""
     print(f"Loading data for {username}...")
     films = load_film_data(username)
     
@@ -933,6 +933,11 @@ def generate_report(username):
                 text-align: center;
                 color: #00e054;
             }}
+            h2 {{
+                color: #00e054;
+                text-align: center;
+                margin-top: 40px;
+            }}
             .chart-container {{
                 margin: 20px auto;
                 max-width: 1200px;
@@ -941,11 +946,109 @@ def generate_report(username):
                 width: 100%;
                 border: none;
             }}
+            .recommendations {{
+                max-width: 1200px;
+                margin: 40px auto;
+                padding: 30px;
+                background-color: #1c2228;
+                border-radius: 10px;
+                border: 2px solid #00e054;
+            }}
+            .recommendation {{
+                background-color: #2c3440;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+                border-left: 4px solid #00e054;
+            }}
+            .recommendation h3 {{
+                margin-top: 0;
+                color: #00e054;
+                font-size: 1.3em;
+            }}
+            .recommendation .info {{
+                margin: 10px 0;
+                color: #9ab;
+            }}
+            .recommendation .rating {{
+                color: #ff8000;
+                font-weight: bold;
+            }}
+            .recommendation .genres {{
+                color: #678;
+                font-style: italic;
+            }}
+            .recommendation .reason {{
+                color: #abc;
+                margin: 8px 0;
+                padding-left: 15px;
+                border-left: 2px solid #456;
+            }}
+            .recommendation a {{
+                color: #00e054;
+                text-decoration: none;
+                display: inline-block;
+                margin-top: 10px;
+            }}
+            .recommendation a:hover {{
+                text-decoration: underline;
+            }}
+            .no-recommendations {{
+                text-align: center;
+                color: #9ab;
+                padding: 30px;
+            }}
         </style>
     </head>
     <body>
         <h1>📊 Letterboxd Visualization Report: {username}</h1>
     """
+    
+    # Add recommendations section if available
+    if recommendations and len(recommendations) > 0:
+        html_content += """
+        <div class="recommendations">
+            <h2>🎬 Recommended Movies for You</h2>
+            <p style="text-align: center; color: #9ab;">Based on your viewing history and preferences</p>
+        """
+        
+        for rec in recommendations:
+            title = rec.get('title', 'Unknown')
+            year = rec.get('year', 'N/A')
+            rating = rec.get('average_rating', 'N/A')
+            genres = rec.get('genres', [])
+            directors = rec.get('directors', [])
+            reasons = rec.get('reasons', [])
+            url = rec.get('url', '#')
+            rank = rec.get('rank', '?')
+            
+            genres_str = ', '.join(genres[:3]) if genres else 'N/A'
+            directors_str = ', '.join(directors[:2]) if directors else 'N/A'
+            
+            html_content += f"""
+            <div class="recommendation">
+                <h3>{rank}. {title} ({year})</h3>
+                <div class="info">
+                    <span class="rating">⭐ {rating}/5</span> • 
+                    <span class="genres">🎭 {genres_str}</span>
+                </div>
+                <div class="info">🎬 Director: {directors_str}</div>
+            """
+            
+            if reasons:
+                html_content += '<div style="margin-top: 15px;">'
+                for reason in reasons[:3]:
+                    html_content += f'<div class="reason">💡 {reason}</div>'
+                html_content += '</div>'
+            
+            html_content += f"""
+                <a href="{url}" target="_blank">View on Letterboxd →</a>
+            </div>
+            """
+        
+        html_content += """
+        </div>
+        """
     
     for name, fig in charts.items():
         height = fig.layout.height if fig.layout.height else 500
