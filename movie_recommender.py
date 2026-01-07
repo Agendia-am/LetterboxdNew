@@ -1,6 +1,7 @@
 """
 Movie Recommendation System for Letterboxd Data
 Uses scikit-learn for content-based and hybrid recommendations
+Scrapes popular films from Letterboxd for recommendations
 """
 
 import json
@@ -345,21 +346,23 @@ def load_user_data(username):
     return None
 
 
-def generate_recommendations(username, top_n=10):
+def generate_recommendations(username, top_n=10, fetch_popular=True, popular_count=500):
     """
     Main function to generate movie recommendations
     
     Args:
         username: Letterboxd username
         top_n: Number of recommendations to return (default 10)
+        fetch_popular: Whether to fetch popular films from Letterboxd (default True)
+        popular_count: Number of popular films to fetch (default 500)
     
     Returns:
         List of recommended films with explanations
     """
-    # Load user data
-    films_data = load_user_data(username)
+    # Load user data (watched films)
+    watched_films = load_user_data(username)
     
-    if not films_data:
+    if not watched_films:
         print(f"Error: No data found for user '{username}'")
         print("Please run the main scraper first to collect film data.")
         return None
@@ -367,9 +370,88 @@ def generate_recommendations(username, top_n=10):
     print(f"\n{'='*60}")
     print(f"GENERATING RECOMMENDATIONS FOR {username.upper()}")
     print(f"{'='*60}")
+    print(f"\n📊 Your watched films: {len(watched_films)}")
     
-    # Initialize recommender
-    recommender = MovieRecommender(films_data)
+    # Get popular films from Letterboxd if requested
+    popular_films = []
+    if fetch_popular:
+        print(f"\n🌐 Fetching popular films from Letterboxd...")
+        
+        try:
+            # Import the collection function
+            import sys
+            import os
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            from LetterboxdNew import collect_popular_films
+            
+            # Fetch popular films
+            popular_films = collect_popular_films(max_films=popular_count, min_pages=10)
+            
+            if popular_films:
+                # Filter out movies the user has already watched
+                watched_urls = set(film.get('url') for film in watched_films if film.get('url'))
+                watched_titles = set(film.get('title', '').lower().strip() for film in watched_films if film.get('title'))
+                
+                # Remove watched movies from popular list
+                unwatched_popular = []
+                for movie in popular_films:
+                    movie_url = movie.get('url')
+                    movie_title = movie.get('title', '').lower().strip()
+                    
+                    # Skip if URL matches or title matches
+                    if movie_url not in watched_urls and movie_title not in watched_titles:
+                        unwatched_popular.append(movie)
+                
+                print(f"✅ Found {len(unwatched_popular)} unwatched films from Letterboxd")
+                popular_films = unwatched_popular
+        except Exception as e:
+            print(f"⚠️  Error fetching popular films: {e}")
+            print("Continuing with only your watched films...")
+            popular_films = []
+    
+    # Combine datasets: watched films + unwatched popular films
+    if popular_films:
+        # Now scrape details for popular films
+        print(f"\n📥 Scraping details for {len(popular_films)} popular films...")
+        print("(This may take a few minutes...)")
+        
+        try:
+            from LetterboxdNew import FilmScraper
+            scraper = FilmScraper(use_playwright=True, use_selenium=False, debug=False)
+            
+            # Scrape popular films in batches with progress
+            from tqdm import tqdm
+            detailed_popular = []
+            
+            for film in tqdm(popular_films, desc="Scraping popular films", unit="film"):
+                film_url = film.get('url')
+                if film_url:
+                    details = scraper.scrape_film_details(film_url)
+                    if details and details.get('scrape_status') == 'success':
+                        detailed_popular.append(details)
+                    
+                    # Stop if we have enough
+                    if len(detailed_popular) >= popular_count:
+                        break
+            
+            print(f"✅ Scraped details for {len(detailed_popular)} films")
+            popular_films = detailed_popular
+            
+        except Exception as e:
+            print(f"⚠️  Error scraping details: {e}")
+            print("Using popular films without full details...")
+    
+    # Combine datasets
+    if popular_films:
+        all_films = watched_films + popular_films
+        print(f"\n📚 Total dataset: {len(all_films)} films ({len(watched_films)} watched + {len(popular_films)} unwatched)")
+    else:
+        all_films = watched_films
+        print(f"\n⚠️  Working with only your watched films ({len(watched_films)} films)")
+        print("     Recommendations may include films you've already seen.")
+    
+    # Initialize recommender with combined dataset
+    recommender = MovieRecommender(all_films)
     
     # Analyze preferences
     preferences = recommender.analyze_user_preferences()
@@ -384,9 +466,9 @@ def generate_recommendations(username, top_n=10):
     else:
         print("\n⚠️  No ratings found. Recommendations based on community ratings only.")
     
-    # Generate recommendations
+    # Generate recommendations (exclude watched films)
     print(f"\n{'='*60}")
-    print(f"TOP {top_n} RECOMMENDED MOVIES")
+    print(f"TOP {top_n} RECOMMENDED MOVIES (UNWATCHED)")
     print(f"{'='*60}\n")
     
     recommendations = recommender.get_hybrid_recommendations(top_n=top_n, exclude_rated=True)

@@ -919,6 +919,143 @@ def merge_film_data(existing_films, new_films):
     return sorted(films_dict.values(), key=lambda x: x.get('title', '').lower())
 
 
+def collect_popular_films(max_films=500, min_pages=10):
+    """
+    Collect popular/trending films from Letterboxd that can be used for recommendations
+    
+    Args:
+        max_films: Maximum number of films to collect
+        min_pages: Minimum number of pages to scrape from each category
+    
+    Returns:
+        List of film dictionaries with basic info
+    """
+    print(f"\n{'='*60}")
+    print(f"COLLECTING POPULAR FILMS FROM LETTERBOXD")
+    print(f"{'='*60}")
+    
+    all_films = []
+    seen_urls = set()
+    
+    # Use the FilmScraper to get rendered pages
+    scraper = FilmScraper(use_playwright=True, use_selenium=False, debug=False)
+    
+    def get_page_with_wait(url):
+        """Get page content with explicit wait for posters to load"""
+        if not scraper._pw_browser:
+            return scraper.get_page_content(url)
+        
+        page = None
+        try:
+            page = scraper._pw_browser.new_page()
+            page.goto(url, timeout=20000, wait_until='domcontentloaded')
+            # Wait for posters to load
+            page.wait_for_selector('ul.poster-list', timeout=10000)
+            time.sleep(2)  # Extra wait for JS to render
+            html = page.content()
+            return html
+        except Exception as e:
+            print(f"Error loading {url}: {e}")
+            return None
+        finally:
+            if page:
+                try:
+                    page.close()
+                except:
+                    pass
+    
+    # Categories to scrape from Letterboxd
+    categories = [
+        ('https://letterboxd.com/films/popular/page/', 'Popular'),
+        ('https://letterboxd.com/films/by/rating/page/', 'Highest Rated'),
+    ]
+    
+    def parse_films_from_page(html):
+        """Extract film information from a Letterboxd page"""
+        if not html:
+            return []
+        
+        soup = BeautifulSoup(html, 'html.parser')
+        films = []
+        
+        # Find film containers - try multiple selectors
+        film_containers = soup.select("li.poster-container")
+        if not film_containers:
+            film_containers = soup.select("ul.poster-list > li")
+        if not film_containers:
+            film_containers = soup.select("div.film-poster")
+        
+        for container in film_containers:
+            try:
+                # Get film URL
+                link = container.select_one("div.film-poster") or container
+                if link:
+                    a_tag = link.select_one("a")
+                    if not a_tag or not a_tag.get('href'):
+                        continue
+                    
+                    film_url = "https://letterboxd.com" + a_tag.get('href')
+                    
+                    # Skip if already seen
+                    if film_url in seen_urls:
+                        continue
+                    
+                    # Get title from image alt text
+                    title = None
+                    img = container.select_one('img')
+                    if img:
+                        title = img.get('alt', '')
+                        # Remove "Poster for " prefix if present
+                        if title.startswith('Poster for '):
+                            title = title[11:]
+                    
+                    if not title:
+                        title = a_tag.get('data-film-name', 'Unknown')
+                    
+                    if not title or not film_url or 'film/' not in film_url:
+                        continue
+                    
+                    seen_urls.add(film_url)
+                    
+                    films.append({
+                        'title': title,
+                        'url': film_url,
+                        'personal_rating': None,  # User hasn't rated these
+                        'source': 'popular'
+                    })
+                    
+            except Exception as e:
+                continue
+        
+        return films
+    
+    # Scrape from each category
+    for base_url, category_name in categories:
+        if len(all_films) >= max_films:
+            break
+        
+        print(f"\n📥 Scraping {category_name}...")
+        
+        for page_num in range(1, min_pages + 1):
+            if len(all_films) >= max_films:
+                break
+            
+            url = f"{base_url}{page_num}/"
+            html = get_page_with_wait(url)
+            
+            if html:
+                page_films = parse_films_from_page(html)
+                all_films.extend(page_films)
+                print(f"   Page {page_num}: +{len(page_films)} films (total: {len(all_films)})")
+            else:
+                print(f"   Page {page_num}: Failed to fetch")
+            
+            time.sleep(0.5)  # Be nice to Letterboxd
+    
+    print(f"\n✅ Collected {len(all_films)} popular films from Letterboxd")
+    return all_films[:max_films]
+
+
 def collect_all_films(username="Agendia", max_pages=None):
     """Collect all films from a Letterboxd profile using parallel workers"""
     session_headers = {

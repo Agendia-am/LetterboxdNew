@@ -1,0 +1,322 @@
+[
+  {
+    "title": "The Shawshank Redemption",
+    "release_date": "1994",
+    "genres": [
+      "Drama",
+      "Crime"
+    ],
+    "directors": [
+      "Frank Darabont"
+    ],
+    "actors": [
+      "Tim Robbins",
+      "Morgan Freeman",
+      "Bob Gunton"
+    ],
+    "average_rating": 4.5,
+    "personal_rating": 5.0,
+    "description": "Two imprisoned men bond over years, finding redemption through compassion.",
+    "runtime": "142 mins",
+    "url": "https://letterboxd.com/film/the-shawshank-redemption/"
+  },
+  {
+    "title": "The Godfather",
+    "release_date": "1972",
+    "genres": [
+      "Crime",
+      "Drama"
+    ],
+    "directors": [
+      "Francis Ford Coppola"
+    ],
+    "actors": [
+      "Marlon Brando",
+      "Al Pacino",
+      "James Caan"
+    ],
+    "average_rating": 4.6,
+    "personal_rating": 5.0,
+    "description": "The aging patriarch of an organized crime dynasty transfers control to his reluctant son.",
+    "runtime": "175 mins",
+    "url": "https://letterboxd.com/film/the-godfather/"
+  },
+  {
+    "title": "The Dark Knight",
+    "release_date": "2008",
+    "genres": [
+      "Action",
+      "Crime",
+      "Drama"
+    ],
+    "directors": [
+      "Christopher Nolan"
+    ],
+    "actors": [
+      "Christian Bale",
+      "Heath Ledger",
+      "Aaron Eckhart"
+    ],
+    "average_rating": 4.3,
+    "personal_rating": 4.5,
+    "description": "Batman faces the Joker, a criminal mastermind who wants to plunge Gotham into anarchy.",
+    "runtime": "152 mins",
+    "url": "https://letterboxd.com/film/the-dark-knight/"
+  },
+  {
+    "title": "Pulp Fiction",
+    "release_date": "1994",
+    "genres": [
+      "Crime",
+      "Drama"
+    ],
+    "directors": [
+      "Quentin Tarantino"
+    ],
+    "actors": [
+      "John Travolta",
+      "Samuel L. Jackson",
+      "Uma Thurman"
+    ],
+    "average_rating": 4.4,
+    "personal_rating": 4.5,
+    "description": "The lives of two mob hitmen, a boxer, and a pair of diner bandits intertwine.",
+    "runtime": "154 mins",
+    "url": "https://letterboxd.com/film/pulp-fiction/"
+  },
+  {
+    "title": "Fight Club",
+    "release_date": "1999",
+    "genres": [
+      "Drama"
+    ],
+    "directors": [
+      "David Fincher"
+    ],
+    "actors": [
+      "Brad Pitt",
+      "Edward Norton",
+      "Helena Bonham Carter"
+    ],
+    "average_rating": 4.2,
+    "personal_rating": 4.0,
+    "description": "An insomniac office worker forms an underground fight club.",
+    "runtime": "139 mins",
+    "url": "https://letterboxd.com/film/fight-club/"
+  },
+  {
+    "title": "The Godfather Part II",
+    "release_date": "1974",
+    "genres": [
+      "Crime",
+      "Drama"
+    ],
+    "directors": [
+      "Francis Ford Coppola"
+    ],
+    "actors": [
+      "Al Pacino",
+      "Robert De Niro",
+      "Robert Duvall"
+    ],
+    "average_rating": 4.5,
+    "personal_rating": null,
+    "description": "The early life and career of Vito Corleone in 1920s New York.",
+    "runtime": "202 mins",
+    "url": "https://letterboxd.com/film/the-godfather-part-ii/"
+  },
+  {
+    "title": "Goodfellas",
+    "release_date": "1990",
+    "genres": [
+      "Crime",
+      "Drama"
+    ],
+    "directors": [
+      "Martin Scorsese"
+    ],
+    "actors": [
+      "Robert De Niro",
+      "Ray Liotta",
+      "Joe Pesci"
+    ],
+    "average_rating": 4.4,
+    "personal_rating": null,
+    "description": "The story of Henry Hill and his life in the mob.",
+    "runtime": "145 mins",
+    "url": "https://letterboxd.com/film/goodfellas/"
+  },
+  {
+    "title": "Inception",
+    "release_date": "2010",
+    "genres": [
+      "Action",
+      "Sci-Fi",
+      "Thriller"
+    ],
+    "directors": [
+      "Christopher Nolan"
+    ],
+    "actors": [
+      "Leonardo DiCaprio",
+      "Joseph Gordon-Levitt",
+      "Ellen Page"
+    ],
+    "average_rating": 4.2,
+    "personal_rating": null,
+    "description": "A thief who steals corporate secrets through dream-sharing technology.",
+    "runtime": "148 mins",
+    "url": "https://letterboxd.com/film/inception/"
+  },
+  {
+    "title": "The Prestige",
+    "release_date": "2006",
+    "genres": [
+      "Drama",
+      "Mystery",
+      "Sci-Fi"
+    ],
+    "directors": [
+      "Christopher Nolan"
+    ],
+    "actors": [
+      "Christian Bale",
+      "Hugh Jackman",
+      "Scarlett Johansson"
+    ],
+    "average_rating": 4.1,
+    "personal_rating": null,
+    "description": "Two magicians engage in a bitter rivalry.",
+    "runtime": "130 mins",
+    "url": "https://letterboxd.com/film/the-prestige/"
+  },
+  {
+    "title": "Casino",
+    "release_date": "1995",
+    "genres": [
+      "Crime",
+      "Drama"
+    ],
+    "directors": [
+      "Martin Scorsese"
+    ],
+    "actors": [
+      "Robert De Niro",
+      "Sharon Stone",
+      "Joe Pesci"
+    ],
+    "average_rating": 4.2,
+    "personal_rating": null,
+    "description": "A tale of greed, deception, money, power, and murder.",
+    "runtime": "178 mins",
+    "url": "https://letterboxd.com/film/casino/"
+  },
+  {
+    "title": "The Departed",
+    "release_date": "2006",
+    "genres": [
+      "Crime",
+      "Drama",
+      "Thriller"
+    ],
+    "directors": [
+      "Martin Scorsese"
+    ],
+    "actors": [
+      "Leonardo DiCaprio",
+      "Matt Damon",
+      "Jack Nicholson"
+    ],
+    "average_rating": 4.1,
+    "personal_rating": null,
+    "description": "An undercover cop and a mole in the police attempt to identify each other.",
+    "runtime": "151 mins",
+    "url": "https://letterboxd.com/film/the-departed/"
+  },
+  {
+    "title": "Se7en",
+    "release_date": "1995",
+    "genres": [
+      "Crime",
+      "Mystery",
+      "Thriller"
+    ],
+    "directors": [
+      "David Fincher"
+    ],
+    "actors": [
+      "Brad Pitt",
+      "Morgan Freeman",
+      "Kevin Spacey"
+    ],
+    "average_rating": 4.3,
+    "personal_rating": null,
+    "description": "Two detectives hunt a serial killer who uses the seven deadly sins as his motives.",
+    "runtime": "127 mins",
+    "url": "https://letterboxd.com/film/se7en/"
+  },
+  {
+    "title": "Zodiac",
+    "release_date": "2007",
+    "genres": [
+      "Crime",
+      "Drama",
+      "Mystery"
+    ],
+    "directors": [
+      "David Fincher"
+    ],
+    "actors": [
+      "Jake Gyllenhaal",
+      "Robert Downey Jr.",
+      "Mark Ruffalo"
+    ],
+    "average_rating": 4.0,
+    "personal_rating": null,
+    "description": "A San Francisco cartoonist becomes an amateur detective obsessed with tracking down the Zodiac Killer.",
+    "runtime": "157 mins",
+    "url": "https://letterboxd.com/film/zodiac/"
+  },
+  {
+    "title": "Memento",
+    "release_date": "2000",
+    "genres": [
+      "Mystery",
+      "Thriller"
+    ],
+    "directors": [
+      "Christopher Nolan"
+    ],
+    "actors": [
+      "Guy Pearce",
+      "Carrie-Anne Moss",
+      "Joe Pantoliano"
+    ],
+    "average_rating": 4.2,
+    "personal_rating": null,
+    "description": "A man with short-term memory loss attempts to track down his wife's murderer.",
+    "runtime": "113 mins",
+    "url": "https://letterboxd.com/film/memento/"
+  },
+  {
+    "title": "Reservoir Dogs",
+    "release_date": "1992",
+    "genres": [
+      "Crime",
+      "Thriller"
+    ],
+    "directors": [
+      "Quentin Tarantino"
+    ],
+    "actors": [
+      "Harvey Keitel",
+      "Tim Roth",
+      "Steve Buscemi"
+    ],
+    "average_rating": 4.1,
+    "personal_rating": null,
+    "description": "After a heist goes wrong, a group of criminals suspects one of them is a police informer.",
+    "runtime": "99 mins",
+    "url": "https://letterboxd.com/film/reservoir-dogs/"
+  }
+]
