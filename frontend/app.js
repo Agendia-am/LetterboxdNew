@@ -46,15 +46,26 @@ async function handleAnalyze() {
     hideError();
     showScreen('loading');
     
+    // Start simulated progress bar
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        if (progress < 90) {
+            progress += Math.random() * 3;
+            updateLoading('Scraping Profile...', `Processing films from ${username}'s profile`, Math.min(90, progress));
+        }
+    }, 500);
+    
     try {
         // Step 1: Scrape profile
-        updateLoading('Scraping Profile...', 'Finding your films on Letterboxd', 20);
+        updateLoading('Scraping Profile...', `Collecting films from ${username}'s profile`, 5);
         
         const scrapeResponse = await fetch(`${API_BASE}/scrape`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username })
         });
+        
+        clearInterval(progressInterval);
         
         if (!scrapeResponse.ok) {
             const error = await scrapeResponse.json();
@@ -64,12 +75,12 @@ async function handleAnalyze() {
         const scrapeData = await scrapeResponse.json();
         currentFilms = scrapeData.films;
         
-        updateLoading('Processing Data...', 'Analyzing your viewing habits', 60);
+        updateLoading('Processing Data...', 'Analyzing your viewing habits', 92);
         
         // Populate dashboard
         populateDashboard(scrapeData);
         
-        updateLoading('Generating Recommendations...', 'Finding movies you might love', 80);
+        updateLoading('Generating Recommendations...', 'Finding movies you might love', 95);
         
         // Load recommendations in background
         loadRecommendations();
@@ -81,6 +92,7 @@ async function handleAnalyze() {
         }, 500);
         
     } catch (error) {
+        clearInterval(progressInterval);
         console.error('Error:', error);
         showError(error.message);
         showScreen('home');
