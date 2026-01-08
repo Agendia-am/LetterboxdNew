@@ -190,11 +190,17 @@ function populateCharts(data) {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 15);
     
-    createHorizontalBarChart('genreRatingChart',
+    const genreColors = [
+        '#e74c3c', '#9b59b6', '#3498db', '#1abc9c', '#f1c40f',
+        '#e91e63', '#00bcd4', '#ff5722', '#8bc34a', '#ff9800',
+        '#673ab7', '#00e676', '#ffc107', '#ff6f00', '#26c6da'
+    ];
+    
+    createColorfulHorizontalBarChart('genreRatingChart',
         genreAvgs.map(g => g[0]),
         genreAvgs.map(g => g[1].toFixed(2)),
         'Avg Personal Rating',
-        '#ff8000'
+        genreColors
     );
     
     // 3. Language Pie Chart
@@ -307,11 +313,17 @@ function populateCharts(data) {
         .sort((a, b) => b[1] - a[1]) // Sort by rating
         .slice(0, 15);
     
-    createHorizontalBarChart('studioRatingChart',
+    const studioColors = [
+        '#e74c3c', '#9b59b6', '#3498db', '#1abc9c', '#f1c40f',
+        '#e91e63', '#00bcd4', '#ff5722', '#8bc34a', '#ff9800',
+        '#673ab7', '#00e676', '#ffc107', '#ff6f00', '#26c6da'
+    ];
+    
+    createColorfulHorizontalBarChart('studioRatingChart',
         studioAvgs.map(s => `${s[0]} (${s[2]})`),
         studioAvgs.map(s => s[1].toFixed(2)),
         'Avg Community Rating',
-        '#00e054'
+        studioColors
     );
     
     // 8. Runtime vs Personal Rating (Scatter Plot)
@@ -561,6 +573,44 @@ function createLineChart(canvasId, labels, data, label) {
                 },
                 x: {
                     ticks: { color: '#9ab' },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+function createColorfulHorizontalBarChart(canvasId, labels, data, label, colors) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    chartInstances[canvasId] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: label,
+                data: data,
+                backgroundColor: colors,
+                borderColor: colors.map(c => c),
+                borderWidth: 2
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: { 
+                    beginAtZero: true,
+                    ticks: { color: '#9ab' },
+                    grid: { color: '#456' }
+                },
+                y: {
+                    ticks: { color: '#9ab', font: { size: 11 } },
                     grid: { display: false }
                 }
             }
@@ -840,24 +890,30 @@ function createAreaComparisonChart(canvasId, ratingsData) {
                 {
                     label: 'Personal Rating',
                     data: ratingsData.map(d => d.personal),
-                    backgroundColor: 'rgba(0, 224, 84, 0.3)',
+                    backgroundColor: 'rgba(0, 224, 84, 0.5)',
                     borderColor: '#00e054',
-                    borderWidth: 2,
+                    borderWidth: 3,
                     fill: true,
                     tension: 0.4,
-                    pointRadius: 3,
-                    pointHoverRadius: 6
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#00e054',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
                 },
                 {
                     label: 'Community Average',
                     data: ratingsData.map(d => d.average),
-                    backgroundColor: 'rgba(255, 128, 0, 0.3)',
+                    backgroundColor: 'rgba(255, 128, 0, 0.5)',
                     borderColor: '#ff8000',
-                    borderWidth: 2,
+                    borderWidth: 3,
                     fill: true,
                     tension: 0.4,
-                    pointRadius: 3,
-                    pointHoverRadius: 6
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#ff8000',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
                 }
             ]
         },
@@ -1116,9 +1172,11 @@ function createBubbleChart(canvasId, collaborations, title, color) {
             datasets: [{
                 label: title,
                 data: bubbleData,
-                backgroundColor: color + 'aa',
+                backgroundColor: color + 'cc',
                 borderColor: color,
-                borderWidth: 2
+                borderWidth: 3,
+                hoverBackgroundColor: color + 'ff',
+                hoverBorderWidth: 4
             }]
         },
         options: {
@@ -1279,12 +1337,15 @@ function createGeoChart(canvasId, countryData) {
                         label: 'Films Watched',
                         data: chartData,
                         backgroundColor: (context) => {
-                            if (!context.raw || !context.raw.value) return 'rgba(200, 200, 200, 0.3)';
+                            if (!context.raw || !context.raw.value) return 'rgba(100, 100, 100, 0.2)';
                             const value = context.raw.value;
                             const maxValue = Math.max(...countryData.map(c => c[1]));
                             const intensity = value / maxValue;
-                            // Green gradient from light to bright Letterboxd green
-                            return `rgba(0, 224, 84, ${0.3 + intensity * 0.7})`;
+                            // Vibrant green to cyan gradient
+                            const r = Math.floor(0 + (0 * intensity));
+                            const g = Math.floor(188 + (224 - 188) * intensity);
+                            const b = Math.floor(212 + (84 - 212) * intensity);
+                            return `rgba(${r}, ${g}, ${b}, ${0.5 + intensity * 0.5})`;
                         },
                         borderColor: '#456',
                         borderWidth: 0.5

@@ -1,17 +1,28 @@
 /* Film Fanatic - Styles */
 
-/* Color Scheme - Letterboxd inspired */
+/* Color Scheme - Vibrant and Colorful */
 :root {
-    --bg-primary: #14181c;
-    --bg-secondary: #1c2228;
-    --bg-card: #2c3440;
+    --bg-primary: #0f1419;
+    --bg-secondary: #1a1f2e;
+    --bg-card: #252d3d;
     --accent-green: #00e054;
     --accent-orange: #ff8000;
+    --accent-purple: #9b59b6;
+    --accent-blue: #3498db;
+    --accent-red: #e74c3c;
+    --accent-yellow: #f1c40f;
+    --accent-pink: #e91e63;
+    --accent-cyan: #00bcd4;
+    --accent-lime: #8bc34a;
     --text-primary: #ffffff;
     --text-secondary: #9ab;
     --text-muted: #678;
     --border: #456;
     --error: #ff4444;
+    --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
 }
 
 /* Reset & Base */
@@ -385,8 +396,16 @@ input[type="text"]:focus {
 .chart-card {
     background: var(--bg-card);
     padding: 48px;
-    border-radius: 8px;
+    border-radius: 12px;
     min-height: 600px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 224, 84, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chart-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 30px rgba(0, 224, 84, 0.15);
 }
 
 .chart-card-wide {
