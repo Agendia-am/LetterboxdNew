@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+.venv/
+venv/
+ENV/
+
+# Data files
+*.json
+data/
+visualizations/
+*.html
+
+# Browsers and drivers
+.ms-playwright/
+ms-playwright/
+playwright/
+.cache/
+
+# Testing
+test_*.py
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large dependencies (will be installed on Vercel)
+node_modules/

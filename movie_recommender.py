@@ -375,11 +375,14 @@ class MovieRecommender:
 
 def load_user_data(username):
     """Load user's film data from JSON files"""
+    from pathlib import Path
+    
     # Try minimal file first, then detailed file
     filenames = [
+        Path('data') / f'{username}_films.json',  # Server saves here
         f'{username}_films_minimal.json',
         f'{username}_detailed_films.json',
-        'collected_films.json'
+        'collected_films.json'  # Global fallback
     ]
     
     for filename in filenames:

@@ -95,8 +95,14 @@ def scrape_profile():
         
         print(f"\nFound {len(all_films_basic)} films on profile")
         
-        # Scrape detailed information
-        scraper = FilmScraper(use_playwright=True, use_selenium=False, debug=False)
+        # Scrape detailed information (use requests only on Vercel/production)
+        import os
+        is_production = os.getenv('VERCEL') or os.getenv('PRODUCTION')
+        scraper = FilmScraper(
+            use_playwright=not is_production, 
+            use_selenium=False, 
+            debug=False
+        )
         
         try:
             detailed_films = scraper.scrape_all_films(

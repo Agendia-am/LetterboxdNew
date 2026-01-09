@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb",
+        "pipInstallArgs": "-r requirements-vercel.txt"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/frontend/(.*)",
+      "dest": "/frontend/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "server.py"
+    }
+  ],
+  "functions": {
+    "server.py": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  }
+}
