@@ -360,10 +360,12 @@ def create_countries_map(df):
     
     countries_mapped = []
     counts_mapped = []
+    country_names = []
     for country, count in country_counts.items():
         if country in country_code_map:
             countries_mapped.append(country_code_map[country])
             counts_mapped.append(count)
+            country_names.append(country)
     
     fig = go.Figure(data=go.Choropleth(
         locations=countries_mapped,
@@ -373,6 +375,8 @@ def create_countries_map(df):
         colorbar_title='Films',
         marker_line_color='darkgray',
         marker_line_width=0.5,
+        text=country_names,
+        hovertemplate='<b>%{text}</b><br>Films: %{z}<extra></extra>'
     ))
     
     fig.update_layout(
