@@ -110,34 +110,102 @@ class FilmScraper:
                 self.browser = None
 
     def _setup_chrome(self):
-        """Set up Chrome browser"""
+        """Set up Chrome browser with optimized build configuration"""
         chrome_options = Options()
-        chrome_options.add_argument("--headless")
+        
+        # Performance and stability arguments
+        chrome_options.add_argument("--headless=new")  # New headless mode
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--disable-software-rasterizer")
         chrome_options.add_argument("--disable-web-security")
         chrome_options.add_argument("--disable-features=VizDisplayCompositor")
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--disable-plugins")
         chrome_options.add_argument("--disable-images")
-        chrome_options.add_argument("--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36")
+        chrome_options.add_argument("--blink-settings=imagesEnabled=false")
         chrome_options.add_argument("--no-first-run")
+        chrome_options.add_argument("--no-default-browser-check")
         chrome_options.add_argument("--disable-background-timer-throttling")
         chrome_options.add_argument("--disable-renderer-backgrounding")
         chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+        chrome_options.add_argument("--disable-client-side-phishing-detection")
+        chrome_options.add_argument("--disable-hang-monitor")
+        chrome_options.add_argument("--disable-popup-blocking")
+        chrome_options.add_argument("--disable-prompt-on-repost")
+        chrome_options.add_argument("--disable-sync")
+        chrome_options.add_argument("--metrics-recording-only")
+        chrome_options.add_argument("--mute-audio")
+        chrome_options.add_argument("--safebrowsing-disable-auto-update")
         
+        # User agent
+        chrome_options.add_argument("--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        
+        # Memory and performance
+        chrome_options.add_argument("--disable-crash-reporter")
+        chrome_options.add_argument("--disable-in-process-stack-traces")
+        chrome_options.add_argument("--disable-logging")
+        chrome_options.add_argument("--disable-setuid-sandbox")
+        chrome_options.add_argument("--log-level=3")
+        chrome_options.add_argument("--silent")
+        
+        # Page load strategy
+        chrome_options.page_load_strategy = 'eager'  # Don't wait for all resources
+        
+        # Experimental options
+        chrome_options.add_experimental_option('excludeSwitches', ['enable-logging', 'enable-automation'])
+        chrome_options.add_experimental_option('useAutomationExtension', False)
+        
+        # Prefs for faster loading
+        prefs = {
+            'profile.default_content_setting_values': {
+                'images': 2,  # Disable images
+                'plugins': 2,
+                'popups': 2,
+                'geolocation': 2,
+                'notifications': 2,
+                'media_stream': 2,
+            },
+            'profile.managed_default_content_settings': {'images': 2}
+        }
+        chrome_options.add_experimental_option('prefs', prefs)
+        
+        if self.debug:
+            print("Installing/updating ChromeDriver...")
         service = Service(ChromeDriverManager().install())
+        
         return webdriver.Chrome(service=service, options=chrome_options)
 
     def _setup_firefox(self):
-        """Set up Firefox browser"""
+        """Set up Firefox browser with optimized build configuration"""
         firefox_options = FirefoxOptions()
         firefox_options.add_argument("--headless")
+        
+        # Performance preferences
         firefox_options.set_preference("dom.webnotifications.enabled", False)
         firefox_options.set_preference("media.volume_scale", "0.0")
+        firefox_options.set_preference("permissions.default.image", 2)  # Disable images
+        firefox_options.set_preference("dom.ipc.plugins.enabled.libflashplayer.so", False)
+        firefox_options.set_preference("media.peerconnection.enabled", False)
+        firefox_options.set_preference("media.autoplay.enabled", False)
+        firefox_options.set_preference("browser.cache.disk.enable", False)
+        firefox_options.set_preference("browser.cache.memory.enable", True)
+        firefox_options.set_preference("browser.cache.offline.enable", False)
+        firefox_options.set_preference("network.http.use-cache", False)
+        firefox_options.set_preference("browser.safebrowsing.enabled", False)
+        firefox_options.set_preference("browser.safebrowsing.malware.enabled", False)
+        firefox_options.set_preference("network.prefetch-next", False)
+        firefox_options.set_preference("network.dns.disablePrefetch", True)
+        firefox_options.set_preference("geo.enabled", False)
         
+        # Page load strategy
+        firefox_options.page_load_strategy = 'eager'
+        
+        if self.debug:
+            print("Installing/updating GeckoDriver...")
         service = FirefoxService(GeckoDriverManager().install())
+        
         return webdriver.Firefox(service=service, options=firefox_options)
 
     def setup_playwright(self):
@@ -148,11 +216,53 @@ class FilmScraper:
             return
 
         try:
+            if self.debug:
+                print("Starting Playwright with optimized configuration...")
+            
             self._pw = sync_playwright().start()
+            
+            # Launch chromium with performance optimizations
+            launch_options = {
+                'headless': True,
+                'args': [
+                    '--disable-blink-features=AutomationControlled',
+                    '--disable-dev-shm-usage',
+                    '--disable-gpu',
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-web-security',
+                    '--disable-features=VizDisplayCompositor,IsolateOrigins,site-per-process',
+                    '--disable-background-timer-throttling',
+                    '--disable-backgrounding-occluded-windows',
+                    '--disable-renderer-backgrounding',
+                    '--disable-extensions',
+                    '--disable-plugins',
+                    '--mute-audio',
+                    '--no-first-run',
+                    '--no-default-browser-check',
+                    '--disable-hang-monitor',
+                    '--disable-popup-blocking',
+                    '--disable-prompt-on-repost',
+                    '--disable-sync',
+                    '--metrics-recording-only',
+                    '--safebrowsing-disable-auto-update',
+                    '--enable-automation',
+                    '--disable-client-side-phishing-detection',
+                    '--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                ]
+            }
+            
             # Use chromium for best compatibility and speed
-            self._pw_browser = self._pw.chromium.launch(headless=True)
+            self._pw_browser = self._pw.chromium.launch(**launch_options)
+            
+            if self.debug:
+                print("✓ Playwright browser launched successfully")
+                
         except Exception as e:
             print(f"Failed to start Playwright: {e}")
+            if self.debug:
+                import traceback
+                traceback.print_exc()
             self.use_playwright = False
 
     def get_page_content(self, url, retries=3):
@@ -186,25 +296,43 @@ class FilmScraper:
 
     def _get_content_selenium(self, url):
         """Get content using Selenium with better error handling and waits"""
-        self.browser.get(url)
+        try:
+            self.browser.get(url)
+        except Exception as e:
+            if self.debug:
+                print(f"Selenium navigation error for {url}: {e}")
+            raise
         
         try:
+            # Wait for main content
             WebDriverWait(self.browser, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "h1.filmtitle"))
+                EC.presence_of_element_located((By.CSS_SELECTOR, "h1.filmtitle, h1.headline-1, body"))
             )
             
+            # Wait for ratings and dynamic content
             try:
                 WebDriverWait(self.browser, 5).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, ".film-poster[data-average-rating], .average-rating, meta[property='letterboxd:average_rating']"))
                 )
             except Exception:
+                # Rating elements might not always be present
                 pass
             
+            # Additional wait for JavaScript to complete
+            try:
+                WebDriverWait(self.browser, 3).until(
+                    lambda driver: driver.execute_script('return document.readyState') == 'complete'
+                )
+            except Exception:
+                pass
+            
+            # Final brief wait for any async content
             time.sleep(1)
             
         except Exception as e:
             if self.debug:
-                print(f"Waited 10 seconds for elements, but they weren't found: {e}")
+                print(f"Selenium wait timeout for {url}: {e}")
+            # Continue anyway to get whatever content is available
         
         return self.browser.page_source
 
@@ -220,15 +348,34 @@ class FilmScraper:
             return None
         page = None
         try:
+            # Create new page with optimized context
             page = self._pw_browser.new_page()
-            page.goto(url, timeout=15000)
+            
+            # Block unnecessary resources for faster loading
+            page.route("**/*.{png,jpg,jpeg,gif,svg,ico,css,woff,woff2,ttf}", lambda route: route.abort())
+            
+            # Navigate with wait_until: 'domcontentloaded' for faster response
+            page.goto(url, timeout=15000, wait_until='domcontentloaded')
+            
+            # Wait for specific content
             try:
-                page.wait_for_selector("h1.filmtitle", timeout=8000)
+                page.wait_for_selector("h1.filmtitle, h1.headline-1", timeout=8000)
             except Exception:
-                # not all pages have that selector; continue
+                # not all pages have that selector; continue anyway
                 pass
+            
+            # Additional wait for dynamic content (ratings, etc.)
+            try:
+                page.wait_for_selector(".average-rating, [data-average-rating], meta[property='letterboxd:average_rating']", timeout=3000)
+            except Exception:
+                pass
+            
+            # Small delay to ensure all dynamic content is loaded
+            page.wait_for_timeout(500)
+            
             html = page.content()
             return html
+            
         except Exception as e:
             if self.debug:
                 print(f"Playwright fetch failed for {url}: {e}")
@@ -865,23 +1012,56 @@ class FilmScraper:
         return results
 
     def cleanup(self):
-        """Clean up resources"""
+        """Clean up resources properly"""
+        errors = []
+        
+        # Close Selenium browser
         if self.browser:
-            self.browser.quit()
+            try:
+                self.browser.quit()
+                if self.debug:
+                    print("\u2713 Selenium browser closed")
+            except Exception as e:
+                errors.append(f"Selenium cleanup error: {e}")
+        
+        # Close requests session
         if hasattr(self.session, 'close'):
-            self.session.close()
+            try:
+                self.session.close()
+                if self.debug:
+                    print("\u2713 Requests session closed")
+            except Exception as e:
+                errors.append(f"Session cleanup error: {e}")
+        
         # Close Playwright browser if used
+        if getattr(self, '_pw_browser', None):
+            try:
+                self._pw_browser.close()
+                if self.debug:
+                    print("\u2713 Playwright browser closed")
+            except Exception as e:
+                errors.append(f"Playwright browser cleanup error: {e}")
+        
+        # Stop Playwright instance
+        if getattr(self, '_pw', None):
+            try:
+                self._pw.stop()
+                if self.debug:
+                    print("\u2713 Playwright stopped")
+            except Exception as e:
+                errors.append(f"Playwright cleanup error: {e}")
+        
+        if errors and self.debug:
+            print(f"Cleanup completed with {len(errors)} error(s):")
+            for error in errors:
+                print(f"  - {error}")
+        elif self.debug:
+            print("\u2713 All resources cleaned up successfully")
+    
+    def __del__(self):
+        """Destructor to ensure cleanup on object deletion"""
         try:
-            if getattr(self, '_pw_browser', None):
-                try:
-                    self._pw_browser.close()
-                except Exception:
-                    pass
-            if getattr(self, '_pw', None):
-                try:
-                    self._pw.stop()
-                except Exception:
-                    pass
+            self.cleanup()
         except Exception:
             pass
 
