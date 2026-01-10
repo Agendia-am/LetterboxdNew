@@ -66,96 +66,25 @@ body {
 .hero {
     text-align: center;
     margin-bottom: 60px;
-    animation: fadeInDown 0.8s ease-out;
 }
 
 .hero h1 {
-    font-size: 3.5rem;
+    font-size: 3rem;
     margin-bottom: 16px;
-    background: linear-gradient(135deg, #3498db 0%, #00d4ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 40px rgba(52, 152, 219, 0.3);
-    animation: glow 2s ease-in-out infinite alternate;
-}
-
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes glow {
-    from {
-        filter: drop-shadow(0 0 10px rgba(52, 152, 219, 0.3));
-    }
-    to {
-        filter: drop-shadow(0 0 20px rgba(52, 152, 219, 0.6));
-    }
+    color: var(--accent-green);
 }
 
 .subtitle {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     color: var(--text-secondary);
-    animation: fadeIn 1s ease-out 0.3s both;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
 }
 
 /* Input Section */
 .input-section {
     background: var(--bg-secondary);
     padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(52, 152, 219, 0.2);
-    animation: fadeInUp 0.8s ease-out 0.4s both;
-    position: relative;
-    overflow: hidden;
-}
-
-.input-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.1), transparent);
-    animation: shine 3s infinite;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes shine {
-    0% {
-        left: -100%;
-    }
-    100% {
-        left: 100%;
-    }
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .input-group {
@@ -167,7 +96,7 @@ body {
 input[type="text"] {
     flex: 1;
     padding: 16px 20px;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     background: var(--bg-card);
     border: 2px solid var(--border);
     border-radius: 8px;
@@ -177,8 +106,7 @@ input[type="text"] {
 
 input[type="text"]:focus {
     outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    border-color: var(--accent-green);
 }
 
 .hint {
@@ -199,31 +127,14 @@ input[type="text"]:focus {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-    color: white;
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-primary::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.5s;
-}
-
-.btn-primary:hover::before {
-    left: 100%;
+    background: var(--accent-green);
+    color: var(--bg-primary);
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #2980b9 0%, #1f6391 100%);
+    background: #00c945;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 224, 84, 0.3);
 }
 
 .btn-primary:disabled {
@@ -279,7 +190,7 @@ input[type="text"]:focus {
     height: 80px;
     margin: 0 auto 32px;
     border: 8px solid var(--bg-card);
-    border-top: 8px solid #3498db;
+    border-top: 8px solid var(--accent-green);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -289,7 +200,7 @@ input[type="text"]:focus {
     height: 40px;
     margin: 0 auto 16px;
     border: 4px solid var(--bg-card);
-    border-top: 4px solid #3498db;
+    border-top: 4px solid var(--accent-green);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -300,7 +211,7 @@ input[type="text"]:focus {
 }
 
 #loadingTitle {
-    color: #3498db;
+    color: var(--accent-green);
     margin-bottom: 12px;
 }
 
@@ -321,10 +232,9 @@ input[type="text"]:focus {
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #3498db 0%, #00d4ff 100%);
+    background: var(--accent-green);
     width: 0%;
     transition: width 0.3s;
-    box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
 }
 
 .progress-text {
